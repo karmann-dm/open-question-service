@@ -5,6 +5,11 @@ import com.services.openquestionservice.questionservice.Constants;
 import javax.persistence.*;
 import java.util.List;
 
+/**
+ * JPA model for Open Question entity.
+ * @author Karmanov Dmitry
+ * @version 1.0
+ */
 @Entity
 @Table(name = "open_questions")
 public class OpenQuestion {
