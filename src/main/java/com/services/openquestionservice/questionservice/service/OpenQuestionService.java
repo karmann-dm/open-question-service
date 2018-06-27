@@ -11,7 +11,11 @@ public interface OpenQuestionService {
     List<Answer> getAllAnswersByQuestionIdAndParticipantId(Long questionId, Long participantId);
     void changeQuestionText(Long questionId, String questionText);
     void changeVotingText(Long questionId, String votingText);
-    Long saveAnswer(Answer answer);
-    void changeAnswer(Answer answer);
-    void deleteAnswer(Answer answer);
+    Long saveAnswer(Long questionId, Long participantId, String answerText);
+    void changeAnswer(Long answerId, String answerText);
+    void deleteAnswer(Long answerId);
+    void upVote(Long answerId);
+    void downVote(Long answerId);
+
+    OpenQuestion getQuestionById(Long questionId);
 }
