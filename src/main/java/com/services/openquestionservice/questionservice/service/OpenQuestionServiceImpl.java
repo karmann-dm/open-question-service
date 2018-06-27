@@ -51,16 +51,16 @@ public class OpenQuestionServiceImpl implements OpenQuestionService {
 
     @Override
     public Long saveAnswer(Answer answer) {
-        return null;
+        return answerRepository.save(answer).getId();
     }
 
     @Override
     public void changeAnswer(Answer answer) {
-
+        answerRepository.save(answer);
     }
 
     @Override
     public void deleteAnswer(Answer answer) {
-
+        answerRepository.delete(answer);
     }
 }
