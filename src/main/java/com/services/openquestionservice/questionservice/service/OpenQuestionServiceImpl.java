@@ -50,17 +50,42 @@ public class OpenQuestionServiceImpl implements OpenQuestionService {
     }
 
     @Override
-    public Long saveAnswer(Answer answer) {
+    public Long saveAnswer(Long questionId, Long participantId, String answerText) {
+        Answer answer = new Answer();
+        answer.setQuestion(openQuestionRepository.findById(questionId).get());
+        answer.setParticipantId(participantId);
+        answer.setAnswerText(answerText);
         return answerRepository.save(answer).getId();
     }
 
     @Override
-    public void changeAnswer(Answer answer) {
+    public void changeAnswer(Long answerId, String answerText) {
+        Answer answer = answerRepository.findById(answerId).get();
+        answer.setAnswerText(answerText);
         answerRepository.save(answer);
     }
 
     @Override
-    public void deleteAnswer(Answer answer) {
-        answerRepository.delete(answer);
+    public void deleteAnswer(Long answerId) {
+        answerRepository.delete(answerRepository.findById(answerId).get());
+    }
+
+    @Override
+    public void upVote(Long answerId) {
+        Answer answer = answerRepository.findById(answerId).get();
+        answer.setVotes(answer.getVotes() + 1);
+        answerRepository.save(answer);
+    }
+
+    @Override
+    public void downVote(Long answerId) {
+        Answer answer = answerRepository.findById(answerId).get();
+        answer.setVotes(answer.getVotes() - 1);
+        answerRepository.save(answer);
+    }
+
+    @Override
+    public OpenQuestion getQuestionById(Long questionId) {
+        return openQuestionRepository.findById(questionId).get();
     }
 }
