@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 
+@Repository
 public interface AnswerRepository extends CrudRepository<Answer, Long> {
     List<Answer> findAllByQuestionAndParticipantId(OpenQuestion question, Long participantId);
     List<Answer> findAllByQuestion(OpenQuestion question);
