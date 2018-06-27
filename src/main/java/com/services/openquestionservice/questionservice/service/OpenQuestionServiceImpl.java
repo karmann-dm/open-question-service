@@ -37,12 +37,16 @@ public class OpenQuestionServiceImpl implements OpenQuestionService {
 
     @Override
     public void changeQuestionText(Long questionId, String questionText) {
-
+        OpenQuestion openQuestion = openQuestionRepository.findById(questionId).get();
+        openQuestion.setQuestionText(questionText);
+        openQuestionRepository.save(openQuestion);
     }
 
     @Override
     public void changeVotingText(Long questionId, String votingText) {
-
+        OpenQuestion openQuestion = openQuestionRepository.findById(questionId).get();
+        openQuestion.setVotingText(votingText);
+        openQuestionRepository.save(openQuestion);
     }
 
     @Override
