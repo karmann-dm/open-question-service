@@ -4,6 +4,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 
+/**
+ * JPA model for Answer entity.
+ * @author Karmanov Dmitry
+ * @version 1.0
+ */
 @Entity
 @Table(name = "answers")
 public class Answer {
@@ -57,6 +62,10 @@ public class Answer {
         this.answerText = answerText;
     }
 
+    /**
+     * JsonIgnore for preventing recursive output in jackson.
+     * @return OpenQuestion
+     */
     @JsonIgnore
     public OpenQuestion getQuestion() {
         return question;
