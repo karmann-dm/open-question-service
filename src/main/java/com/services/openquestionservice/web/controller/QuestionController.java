@@ -1,32 +1,26 @@
 package com.services.openquestionservice.web.controller;
 
-import com.services.openquestionservice.questionservice.model.Answer;
 import com.services.openquestionservice.questionservice.model.OpenQuestion;
-import com.services.openquestionservice.questionservice.repository.AnswerRepository;
-import com.services.openquestionservice.questionservice.repository.OpenQuestionRepository;
+import com.services.openquestionservice.questionservice.service.OpenQuestionService;
 import com.services.openquestionservice.web.dto.AnswerDto;
+import com.services.openquestionservice.web.dto.AnswerResponseDto;
 import com.services.openquestionservice.web.dto.OpenQuestionDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/open_question")
 public class QuestionController {
     @Autowired
-    private OpenQuestionRepository openQuestionRepository;
-
-    @Autowired
-    private AnswerRepository answerRepository;
+    OpenQuestionService openQuestionService;
 
     @PostMapping("/")
     public ResponseEntity<OpenQuestionDto> createQuestion(@RequestBody OpenQuestionDto openQuestionDto) {
-        OpenQuestion openQuestion = OpenQuestionDto.createDomainObject(openQuestionDto);
-        openQuestionRepository.save(openQuestion);
-
+        OpenQuestion openQuestion = openQuestionService.saveQuestion(
+                OpenQuestionDto.createDomainObject(openQuestionDto)
+        );
         return new ResponseEntity<>(
                 OpenQuestionDto.createTransferObject(openQuestion),
                 HttpStatus.CREATED
@@ -34,56 +28,80 @@ public class QuestionController {
     }
 
     @GetMapping("/{openQuestionId:\\d+}/all_answers")
-    public ResponseEntity<List<Answer>> getAllAnswersOfQuestion(@PathVariable Long openQuestionId) {
-        OpenQuestion openQuestion = openQuestionRepository.findById(openQuestionId).get();
-        return new ResponseEntity<>(openQuestion.getAnswers(), HttpStatus.OK);
+    public ResponseEntity<AnswerResponseDto> getAllAnswersOfQuestion(@PathVariable Long openQuestionId) {
+        OpenQuestion question = openQuestionService.getQuestionById(openQuestionId);
+        return new ResponseEntity<>(
+                new AnswerResponseDto(
+                        question.getQuestionText(),
+                        question.getVotingText(),
+                        openQuestionService.getAllAnswersByQuestionId(openQuestionId)
+                ),
+                HttpStatus.OK
+        );
     }
 
     @GetMapping("/{openQuestionId:\\d+}")
-    public ResponseEntity<List<Answer>> getAllAnswersOfParticipant(@PathVariable("openQuestionId") Long openQuestionId,
+    public ResponseEntity<AnswerResponseDto> getAllAnswersOfParticipant(@PathVariable("openQuestionId") Long openQuestionId,
                                            @RequestParam("participantId") Long participantId)
     {
-        return new ResponseEntity<>(answerRepository.findAllByQuestionAndParticipantId(openQuestionRepository.findById(openQuestionId).get(), participantId),
-                HttpStatus.OK);
+        OpenQuestion question = openQuestionService.getQuestionById(openQuestionId);
+        return new ResponseEntity<>(
+                new AnswerResponseDto(
+                        question.getQuestionText(),
+                        question.getVotingText(),
+                        openQuestionService.getAllAnswersByQuestionIdAndParticipantId(openQuestionId, participantId)
+                ),
+                HttpStatus.OK
+        );
     }
 
     @PutMapping("/{openQuestionId:\\d+}/question_text")
     public ResponseEntity changeQuestionText(@PathVariable("openQuestionId") Long openQuestionId, @RequestBody String questionText)
     {
-        OpenQuestion openQuestion = openQuestionRepository.findById(openQuestionId).get();
-        openQuestion.setQuestionText(questionText);
-        openQuestionRepository.save(openQuestion);
+        openQuestionService.changeQuestionText(openQuestionId, questionText);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PutMapping("/{openQuestionId:\\d+}/voting_text")
     public ResponseEntity changeVotingText(@PathVariable("openQuestionId") Long openQuestionId, @RequestBody String votingText)
     {
-        OpenQuestion openQuestion = openQuestionRepository.findById(openQuestionId).get();
-        openQuestion.setVotingText(votingText);
-        openQuestionRepository.save(openQuestion);
+        openQuestionService.changeVotingText(openQuestionId, votingText);
         return new ResponseEntity(HttpStatus.OK);
     }
 
     @PostMapping("/answer")
     public ResponseEntity<Long> createAnswer(@RequestBody AnswerDto answerDto) {
-        OpenQuestion openQuestion = openQuestionRepository.findById(answerDto.getOpenQuestionId()).get();
-        Answer answer = new Answer(answerDto.getParticipantId(), answerDto.getAnswerText(), openQuestion);
-        answerRepository.save(answer);
-        return new ResponseEntity<>(answer.getId(), HttpStatus.CREATED);
+        return new ResponseEntity<>(
+                openQuestionService.saveAnswer(
+                        answerDto.getOpenQuestionId(),
+                        answerDto.getParticipantId(),
+                        answerDto.getAnswerText()
+                ),
+                HttpStatus.CREATED
+        );
     }
 
     @PutMapping("/answer/{answerId}")
-    public void changeAnswer(@PathVariable("answerId") Long answerId) {
-
+    public ResponseEntity changeAnswer(@PathVariable("answerId") Long answerId, @RequestBody AnswerDto answerDto) {
+        openQuestionService.changeAnswer(answerId, answerDto.getAnswerText());
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     @DeleteMapping("/answer/{answerId}")
-    public void deleteAnswer(@PathVariable("answerId") Long answerId) {}
+    public ResponseEntity deleteAnswer(@PathVariable("answerId") Long answerId) {
+        openQuestionService.deleteAnswer(answerId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
     @PostMapping("/answer/{answerId}/upvote")
-    public void upVote(@PathVariable("answerId") Long answerId) {}
+    public ResponseEntity upVote(@PathVariable("answerId") Long answerId) {
+        openQuestionService.upVote(answerId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 
     @PostMapping("/answer/{answerId}/downvote")
-    public void downVote(@PathVariable("answerId") Long answerId) {}
+    public ResponseEntity downVote(@PathVariable("answerId") Long answerId) {
+        openQuestionService.downVote(answerId);
+        return new ResponseEntity(HttpStatus.OK);
+    }
 }
