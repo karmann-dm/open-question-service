@@ -31,7 +31,8 @@ public class OpenQuestionServiceImpl implements OpenQuestionService {
 
     @Override
     public List<Answer> getAllAnswersByQuestionIdAndParticipantId(Long questionId, Long participantId) {
-        return null;
+        OpenQuestion openQuestion = openQuestionRepository.findById(questionId).get();
+        return answerRepository.findAllByQuestionAndParticipantId(openQuestion, participantId);
     }
 
     @Override
