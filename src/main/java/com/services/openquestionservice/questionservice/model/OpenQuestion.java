@@ -1,8 +1,9 @@
-package com.services.openquestionservice.service.model;
+package com.services.openquestionservice.questionservice.model;
 
-import com.services.openquestionservice.service.Constants;
+import com.services.openquestionservice.questionservice.Constants;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "open_questions")
@@ -20,6 +21,9 @@ public class OpenQuestion {
 
     @Column(name = "voting_text")
     private String votingText;
+
+    @OneToMany(mappedBy = "question")
+    private List<Answer> answers;
 
     public OpenQuestion() {
     }
@@ -63,5 +67,13 @@ public class OpenQuestion {
             this.votingText = Constants.DEFAULT_VOTING_TEXT;
         else
             this.votingText = votingText;
+    }
+
+    public void addAnswer(Answer answer) {
+        answers.add(answer);
+    }
+
+    public List<Answer> getAnswers() {
+        return answers;
     }
 }
