@@ -80,8 +80,10 @@ public class OpenQuestionServiceImpl implements OpenQuestionService {
     @Override
     public void downVote(Long answerId) {
         Answer answer = answerRepository.findById(answerId).get();
-        answer.setVotes(answer.getVotes() - 1);
-        answerRepository.save(answer);
+        if(answer.getVotes() > 0) {
+            answer.setVotes(answer.getVotes() - 1);
+            answerRepository.save(answer);
+        }
     }
 
     @Override
