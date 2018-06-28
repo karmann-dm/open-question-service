@@ -10,6 +10,8 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.validation.Valid;
+
 /**
  * Provides REST API endpoints for interaction with questions and answers.
  * TODO: Make RabbitMQ message sending.
@@ -28,12 +30,12 @@ public class QuestionController {
      * @return ResponseEntity {@link OpenQuestionDto} {@link ResponseEntity} Serialized OpenQuestionDto object.
      */
     @PostMapping("/")
-    public ResponseEntity<OpenQuestionDto> createQuestion(@RequestBody OpenQuestionDto openQuestionDto) {
+    public ResponseEntity<OpenQuestionDto> createQuestion(@Valid @RequestBody OpenQuestionDto openQuestionDto) {
         OpenQuestion openQuestion = openQuestionService.saveQuestion(
                 OpenQuestionDto.createDomainObject(openQuestionDto)
         );
         // Making request to events service.
-        makeRequestToEventsService(openQuestion.getId());
+        // makeRequestToEventsService(openQuestion.getId());
         return new ResponseEntity<>(
                 OpenQuestionDto.createTransferObject(openQuestion),
                 HttpStatus.CREATED
