@@ -1,9 +1,19 @@
 package com.services.openquestionservice.web.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 public class AnswerDto {
+    @NotNull
     private Long openQuestionId;
+
+    @NotNull
     private Long participantId;
+
+    @NotNull
+    @NotBlank
     private String answerText;
+    
     private Integer votes;
 
     public AnswerDto() {

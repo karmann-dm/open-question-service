@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * Provides REST API endpoints for interaction with questions and answers.
@@ -104,7 +105,7 @@ public class QuestionController {
      * @return ResponseEntity {@link ResponseEntity} Http OK status if success.
      */
     @PutMapping("/{openQuestionId:\\d+}/question_text")
-    public ResponseEntity changeQuestionText(@PathVariable("openQuestionId") Long openQuestionId, @RequestBody String questionText)
+    public ResponseEntity changeQuestionText(@PathVariable("openQuestionId") Long openQuestionId, @RequestBody @NotNull String questionText)
     {
         openQuestionService.changeQuestionText(openQuestionId, questionText);
         return new ResponseEntity(HttpStatus.OK);
@@ -117,7 +118,7 @@ public class QuestionController {
      * @return ResponseEntity {@link ResponseEntity} Http OK status if success.
      */
     @PutMapping("/{openQuestionId:\\d+}/voting_text")
-    public ResponseEntity changeVotingText(@PathVariable("openQuestionId") Long openQuestionId, @RequestBody String votingText)
+    public ResponseEntity changeVotingText(@PathVariable("openQuestionId") Long openQuestionId, @RequestBody @NotNull String votingText)
     {
         openQuestionService.changeVotingText(openQuestionId, votingText);
         return new ResponseEntity(HttpStatus.OK);
@@ -129,7 +130,7 @@ public class QuestionController {
      * @return ResponseEntity {@link ResponseEntity} Http 201 status if success.
      */
     @PostMapping("/answer")
-    public ResponseEntity<Long> createAnswer(@RequestBody AnswerDto answerDto) {
+    public ResponseEntity<Long> createAnswer(@RequestBody @Valid AnswerDto answerDto) {
         return new ResponseEntity<>(
                 openQuestionService.saveAnswer(
                         answerDto.getOpenQuestionId(),
@@ -148,6 +149,8 @@ public class QuestionController {
      */
     @PutMapping("/answer/{answerId}")
     public ResponseEntity changeAnswer(@PathVariable("answerId") Long answerId, @RequestBody AnswerDto answerDto) {
+        if(answerDto.getAnswerText() == null || answerDto.getAnswerText() == "")
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         openQuestionService.changeAnswer(answerId, answerDto.getAnswerText());
         return new ResponseEntity(HttpStatus.OK);
     }
