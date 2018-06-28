@@ -3,12 +3,20 @@ package com.services.openquestionservice.web.dto;
 import com.services.openquestionservice.questionservice.model.Answer;
 import com.services.openquestionservice.questionservice.model.OpenQuestion;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 public class OpenQuestionDto {
+    @NotNull
     private Long eventId;
+
     private Long id;
+
+    @NotNull
+    @NotBlank
     private String questionText;
+
     private String votingText;
     private List<Answer> answers;
 
