@@ -69,7 +69,7 @@ public class OpenQuestion {
 
     public void setVotingText(String votingText) {
         if(votingText == null)
-            this.votingText = Constants.DEFAULT_VOTING_TEXT;
+            this.votingText = Constants.DEFAULT_VOTING_TEXT.toString();
         else
             this.votingText = votingText;
     }
