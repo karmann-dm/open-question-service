@@ -4,13 +4,15 @@ import com.services.openquestionservice.OpenQuestionServiceApplication;
 import com.services.openquestionservice.questionservice.Constants;
 import com.services.openquestionservice.questionservice.repository.AnswerRepository;
 import com.services.openquestionservice.questionservice.repository.OpenQuestionRepository;
-import com.services.openquestionservice.questionservice.service.OpenQuestionService;
+import com.services.openquestionservice.web.dto.AnswerDto;
 import com.services.openquestionservice.web.dto.OpenQuestionDto;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -47,11 +49,7 @@ public class QuestionControllerTests {
 
     private HttpMessageConverter mappingJacksonHttpMessageConverter;
 
-    @Autowired
-    private OpenQuestionRepository openQuestionRepository;
-
-    @Autowired
-    private AnswerRepository answerRepository;
+    private static final Logger logger = LoggerFactory.getLogger(QuestionControllerTests.class);
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -133,7 +131,7 @@ public class QuestionControllerTests {
                         "Second test question",
                         "Voting text 2")))
                 .contentType(contentType)
-        ).andExpect(status().is2xxSuccessful()).andExpect(status().is2xxSuccessful())
+        ).andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(2)))
                 .andExpect(jsonPath("$.votingText", is("Voting text 2")))
@@ -147,7 +145,7 @@ public class QuestionControllerTests {
                         "Third test question",
                         "Voting text 3")))
                 .contentType(contentType)
-        ).andExpect(status().is2xxSuccessful()).andExpect(status().is2xxSuccessful())
+        ).andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(contentType))
                 .andExpect(jsonPath("$.id", is(3)))
                 .andExpect(jsonPath("$.votingText", is("Voting text 3")))
@@ -155,8 +153,174 @@ public class QuestionControllerTests {
     }
 
     @Test
-    public void test2AddAnswer() {
+    public void test2AddAnswer() throws Exception {
+        mockMvc.perform(post("/api/open_question/answer")
+                .content(convertToJson(new AnswerDto(null, null, null)))
+                .contentType(contentType)
+        ).andExpect(status().isBadRequest());
 
+        mockMvc.perform(post("/api/open_question/answer")
+                .content(convertToJson(new AnswerDto(1L, null, null)))
+                .contentType(contentType)
+        ).andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/open_question/answer")
+                .content(convertToJson(new AnswerDto(null, 1L, null)))
+                .contentType(contentType)
+        ).andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/open_question/answer")
+                .content(convertToJson(new AnswerDto(1L, 1L, "")))
+                .contentType(contentType)
+        ).andExpect(status().isBadRequest());
+
+        mockMvc.perform(post("/api/open_question/answer")
+                .content(convertToJson(new AnswerDto(1L, 1L, "Fist answer")))
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$", is(1)));
+
+        mockMvc.perform(post("/api/open_question/answer")
+                .content(convertToJson(new AnswerDto(1L, 3L, "Second answer")))
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$", is(2)));
+
+        mockMvc.perform(post("/api/open_question/answer")
+                .content(convertToJson(new AnswerDto(2L, 1L, "Third answer")))
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$", is(3)));
+    }
+
+    @Test
+    public void test3ChangeQuestionText() throws Exception {
+        mockMvc.perform(put("/api/open_question/1/question_text")
+                .content("")
+                .contentType(contentType)
+        ).andExpect(status().isBadRequest());
+
+        mockMvc.perform(put("/api/open_question/1/question_text")
+                .content("Changed q1 text")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(put("/api/open_question/2/question_text")
+                .content("Changed q2 text")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(put("/api/open_question/3/question_text")
+                .content("Changed q3 text")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void test4ChangeVotingText() throws Exception {
+        mockMvc.perform(put("/api/open_question/1/voting_text")
+                .content("")
+                .contentType(contentType)
+        ).andExpect(status().isBadRequest());
+
+        mockMvc.perform(put("/api/open_question/1/voting_text")
+                .content("Changed q1 voting text")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(put("/api/open_question/2/voting_text")
+                .content("Changed q2 voting text")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(put("/api/open_question/3/voting_text")
+                .content("Changed q3 voting text")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void test5ChangeAnswer() throws Exception {
+        mockMvc.perform(put("/api/open_question/answer/1")
+                .content(convertToJson(new AnswerDto(null, null, null)))
+                .contentType(contentType)
+        ).andExpect(status().isBadRequest());
+
+        mockMvc.perform(put("/api/open_question/answer/1")
+                .content(convertToJson(new AnswerDto(null, null, "Changed answer 1")))
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(put("/api/open_question/answer/2")
+                .content(convertToJson(new AnswerDto(null, null, "Changed answer 2")))
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(put("/api/open_question/answer/3")
+                .content(convertToJson(new AnswerDto(null, null, "Changed answer 3")))
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void test6UpVote() throws Exception {
+        mockMvc.perform(post("/api/open_question/answer/1/upvote")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(post("/api/open_question/answer/2/upvote")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(post("/api/open_question/answer/3/upvote")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void test7DownVote() throws Exception {
+        mockMvc.perform(post("/api/open_question/answer/1/downvote")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(post("/api/open_question/answer/2/downvote")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+
+        mockMvc.perform(post("/api/open_question/answer/3/downvote")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void test8GetAllAnswersByQuestionId() throws Exception {
+        mockMvc.perform(get("/api/open_question/1/all_answers")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.questionText", is("Changed q1 text")))
+                .andExpect(jsonPath("$.votingText", is("Changed q1 voting text")))
+                .andExpect(jsonPath("$.answers[0].id", is(1)))
+                .andExpect(jsonPath("$.answers[1].id", is(2)));
+
+        mockMvc.perform(get("/api/open_question/2/all_answers")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.questionText", is("Changed q2 text")))
+                .andExpect(jsonPath("$.votingText", is("Changed q2 voting text")))
+                .andExpect(jsonPath("$.answers[0].id", is(3)));
+    }
+
+    @Test
+    public void test9GetAllAnswersByParticipantId() throws Exception {
+        mockMvc.perform(get("/api/open_question/1?participantId=1")
+                .contentType(contentType)
+        ).andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.questionText", is("Changed q1 text")))
+                .andExpect(jsonPath("$.votingText", is("Changed q1 voting text")))
+                .andExpect(jsonPath("$.answers[0].id", is(1)));
     }
 
     private String convertToJson(Object object) throws IOException {

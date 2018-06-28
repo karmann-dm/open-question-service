@@ -148,7 +148,9 @@ public class QuestionController {
      * @return ResponseEntity {@link ResponseEntity} Http 200 status if success.
      */
     @PutMapping("/answer/{answerId}")
-    public ResponseEntity changeAnswer(@PathVariable("answerId") Long answerId, @RequestBody @Valid AnswerDto answerDto) {
+    public ResponseEntity changeAnswer(@PathVariable("answerId") Long answerId, @RequestBody AnswerDto answerDto) {
+        if(answerDto.getAnswerText() == null || answerDto.getAnswerText() == "")
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         openQuestionService.changeAnswer(answerId, answerDto.getAnswerText());
         return new ResponseEntity(HttpStatus.OK);
     }
