@@ -1,6 +1,7 @@
 package com.services.openquestionservice.web.controller;
 
 import com.services.openquestionservice.OpenQuestionServiceApplication;
+import com.services.openquestionservice.questionservice.Constants;
 import com.services.openquestionservice.questionservice.repository.AnswerRepository;
 import com.services.openquestionservice.questionservice.repository.OpenQuestionRepository;
 import com.services.openquestionservice.questionservice.service.OpenQuestionService;
@@ -110,7 +111,7 @@ public class QuestionControllerTests {
                 .contentType(contentType)
         ).andExpect(status().isBadRequest());
 
-        // Creating question with correct questionText field. (SHOULD BE 200 OK)
+        // Creating question with correct questionText field. (SHOULD BE 203 Created)
         mockMvc.perform(post("/api/open_question/")
                 .content(convertToJson(new OpenQuestionDto(
                         1L,
@@ -119,7 +120,10 @@ public class QuestionControllerTests {
                         null)))
                 .contentType(contentType)
         ).andExpect(status().is2xxSuccessful())
-        .andExpect(content().contentType(contentType));
+            .andExpect(content().contentType(contentType))
+            .andExpect(jsonPath("$.id", is(1)))
+            .andExpect(jsonPath("$.votingText", is(Constants.DEFAULT_VOTING_TEXT.toString())))
+            .andExpect(jsonPath("$.answers", is(nullValue())));
 
         // Creating question with correct questionText field. (SHOULD BE 203 Created)
         mockMvc.perform(post("/api/open_question/")
@@ -127,9 +131,13 @@ public class QuestionControllerTests {
                         1L,
                         null,
                         "Second test question",
-                        null)))
+                        "Voting text 2")))
                 .contentType(contentType)
-        ).andExpect(status().is2xxSuccessful());
+        ).andExpect(status().is2xxSuccessful()).andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$.id", is(2)))
+                .andExpect(jsonPath("$.votingText", is("Voting text 2")))
+                .andExpect(jsonPath("$.answers", is(nullValue())));
 
         // Creating question with correct questionText field. (SHOULD BE 200 Created)
         mockMvc.perform(post("/api/open_question/")
@@ -137,11 +145,13 @@ public class QuestionControllerTests {
                         2L,
                         null,
                         "Third test question",
-                        null)))
+                        "Voting text 3")))
                 .contentType(contentType)
-        ).andExpect(status().is2xxSuccessful());
-
-        assertEquals(openQuestionRepository.count(), 3);
+        ).andExpect(status().is2xxSuccessful()).andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(contentType))
+                .andExpect(jsonPath("$.id", is(3)))
+                .andExpect(jsonPath("$.votingText", is("Voting text 3")))
+                .andExpect(jsonPath("$.answers", is(nullValue())));
     }
 
     @Test
